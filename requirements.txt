@@ -1,0 +1,14 @@
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+
+langchain
+langchain-groq
+
+python-dotenv
+
+pydantic
+
+scipy
