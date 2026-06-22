@@ -1,64 +1,35 @@
-import json
-from langchain_groq import ChatGroq
-from langchain_core.prompts import ChatPromptTemplate
-
-from config import GROQ_API_KEY, MODEL_NAME
-
-llm = ChatGroq(
-    groq_api_key=GROQ_API_KEY,
-    model=MODEL_NAME,
-    temperature=0
-)
-
 def create_visualization_plan(eda_report):
 
-    prompt = ChatPromptTemplate.from_template(
-        """
-        You are a senior data scientist and expert in exploratory data analysis (EDA).
+    plan = []
 
-        You will be given a dataset summary (EDA report).
+    nums = eda_report["numeric_columns"]
 
-        Your task is to select ONLY the most useful and meaningful visualizations that help understand the dataset deeply.
+    cats = eda_report["categorical_columns"]
 
-        Focus on:
-        - Data distributions
-        - Feature relationships
-        - Correlations
-        - Outliers
-        - Categorical patterns
+    if len(nums) > 1:
 
-        Rules:
-        - Do NOT generate unnecessary or redundant plots
-        - Maximum 8 visualizations only
-        - Prefer insights over quantity
-        - Each visualization must answer a question about the data
-        - Use both single-feature and multi-feature analysis when useful
+        plan.append({
+            "chart_type": "heatmap",
+            "features": nums
+        })
 
-        Return ONLY valid JSON (no explanation, no markdown).
+    for col in nums[:3]:
 
-        Use this format:
+        plan.append({
+            "chart_type": "histogram",
+            "features": [col]
+        })
 
-        [
-        {{
-            "analysis_type": "distribution | relationship | categorical | correlation | outlier",
-            "chart_type": "histogram | boxplot | countplot | scatter | heatmap | bar | violin",
-            "features": ["feature1"] ,
-            "reason": "short explanation of why this visualization is useful",
-            "priority": "high | medium | low"
-        }}
-        ]
+        plan.append({
+            "chart_type": "boxplot",
+            "features": [col]
+        })
 
-        Dataset Summary:
-        {eda_report}
-        """
-    )
+    for col in cats[:3]:
 
-    chain = prompt | llm
+        plan.append({
+            "chart_type": "countplot",
+            "features": [col]
+        })
 
-    response = chain.invoke({
-        "eda_report": json.dumps(eda_report, indent=2)
-    })
-
-    content = response.content.replace("```json", "").replace("```", "").strip()
-
-    return json.loads(content)
+    return plan[:8]
