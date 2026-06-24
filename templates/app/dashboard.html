@@ -1,0 +1,90 @@
+{% extends "app/_layout.html" %}
+{% block title %}Dashboard - Atlas{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block page_subtitle %}Pipeline workspace{% endblock %}
+{% block content %}
+<div class="mb-8 fade-up">
+  <h1 class="font-display text-3xl font-semibold tracking-tight">Atlas data science pipeline</h1>
+  <p class="text-sm mt-1" style="color: var(--fg-muted)">Upload a CSV, run main.py, and review EDA, insights, plots, ML results, and the final report.</p>
+</div>
+
+{% if result %}
+{% set eda = result.eda_report %}
+{% set ml = result.ml_summary %}
+<div class="grid md:grid-cols-4 gap-4 mb-8">
+  {% for label, value, sub, accent in [
+    ('Dataset', latest_run.filename, latest_run.rows ~ ' rows', False),
+    ('Columns', latest_run.columns, eda.numeric_columns|length ~ ' numeric', False),
+    ('Best model', ml.best_model.model if ml.best_model else 'Unavailable', ml.task_type|title, True),
+    ('Plots', result.plots|length + result.ml_plots|length, 'generated files', False)
+  ] %}
+  <div class="card card-hover">
+    <div class="text-xs" style="color: var(--fg-muted)">{{ label }}</div>
+    <div class="font-display text-2xl font-semibold mt-2 {% if accent %}gradient-text{% endif %}">{{ value }}</div>
+    <div class="text-xs mt-1" style="color: var(--fg-subtle)">{{ sub }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="grid lg:grid-cols-3 gap-4">
+  <div class="card lg:col-span-2">
+    <div class="flex items-center justify-between mb-4">
+      <div class="font-display font-semibold">Latest run outputs</div>
+      <a href="{{ url_for('analyze') }}" class="text-xs" style="color: var(--accent)">View pipeline</a>
+    </div>
+    <div class="space-y-3">
+      {% for label, status, href in [
+        ('EDA report', eda.rows ~ ' rows analyzed', url_for('eda')),
+        ('Insights', result.insights|length ~ ' findings', url_for('insights')),
+        ('Visualizations', (result.plots|length + result.ml_plots|length) ~ ' images', url_for('visualizations')),
+        ('Machine learning', ml.best_model.model if ml.best_model else 'No winning model', url_for('ml_results')),
+        ('Final report', 'Ready', url_for('report'))
+      ] %}
+      <a href="{{ href }}" class="flex items-center justify-between py-2 border-b" style="border-color: var(--border)">
+        <div>
+          <div class="text-sm font-medium">{{ label }}</div>
+          <div class="text-xs" style="color: var(--fg-subtle)">{{ status }}</div>
+        </div>
+        <div class="text-xs" style="color: var(--accent)">Open</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="font-display font-semibold mb-3">Actions</div>
+    <a href="{{ url_for('upload') }}" class="btn btn-accent w-full mb-2">Run another CSV</a>
+    <a href="{{ url_for('report') }}" class="btn btn-ghost w-full mb-2">View report</a>
+    <a href="{{ url_for('visualizations') }}" class="btn btn-ghost w-full">View plots</a>
+    {% if result.actions %}
+    <div class="divider my-4"></div>
+    <div class="text-xs mb-2" style="color: var(--fg-muted)">Privacy actions</div>
+    <ul class="text-sm space-y-1" style="color: var(--fg-muted)">
+      {% for action in result.actions %}
+      <li>{{ action }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+{% else %}
+<div class="grid lg:grid-cols-3 gap-4">
+  <div class="card lg:col-span-2">
+    <div class="font-display font-semibold mb-3">No run loaded</div>
+    <p class="text-sm mb-4" style="color: var(--fg-muted)">This Flask app now calls the existing main.run_pipeline(file_path) function directly. Start with a CSV upload to generate every downstream page.</p>
+    {% if latest_run.error %}<p class="text-sm mb-4" style="color: var(--fg-muted)">Last error: {{ latest_run.error }}</p>{% endif %}
+    <a href="{{ url_for('upload') }}" class="btn btn-accent">Upload dataset</a>
+  </div>
+  <div class="card">
+    <div class="font-display font-semibold mb-3">Pipeline stages</div>
+    <div class="text-sm space-y-2" style="color: var(--fg-muted)">
+      <div>Privacy preprocessing</div>
+      <div>EDA and insight generation</div>
+      <div>AutoML training</div>
+      <div>Visualization generation</div>
+      <div>LLM report writing</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

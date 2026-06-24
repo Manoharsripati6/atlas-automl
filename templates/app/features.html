@@ -1,0 +1,23 @@
+{% extends "app/_layout.html" %}
+{% block title %}Feature Importance - Atlas{% endblock %}
+{% block page_title %}Feature Importance{% endblock %}
+{% block page_subtitle %}{{ latest_run.filename or "No dataset" }}{% endblock %}
+{% block content %}
+{% if not has_results %}
+<div class="max-w-2xl mx-auto card text-center">
+  <div class="font-display text-2xl font-semibold mb-2">No feature importance yet</div>
+  <p class="text-sm mb-4" style="color: var(--fg-muted)">Run a CSV through the model pipeline first.</p>
+  <a href="{{ url_for('upload') }}" class="btn btn-accent">Upload dataset</a>
+</div>
+{% elif feature_plot %}
+<div class="card">
+  <div class="font-display font-semibold mb-3">Feature importance from the trained model</div>
+  <img src="{{ output_url(feature_plot) }}" alt="Feature importance" class="w-full rounded-lg" style="background: white;">
+</div>
+{% else %}
+<div class="card text-center">
+  <div class="font-display text-xl font-semibold mb-2">Feature importance was not available</div>
+  <p class="text-sm" style="color: var(--fg-muted)">The best estimator for this run does not expose feature_importances_.</p>
+</div>
+{% endif %}
+{% endblock %}

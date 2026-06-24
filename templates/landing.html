@@ -1,0 +1,185 @@
+{% extends "base_public.html" %}
+{% block title %}Atlas — Your AI Data Scientist{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="relative overflow-hidden">
+  <div class="hero-bg"></div>
+  <div id="hero-globe" class="absolute inset-0 opacity-80"></div>
+  <div class="relative max-w-6xl mx-auto px-6 pt-28 pb-32 text-center">
+    <div class="inline-flex items-center gap-2 badge badge-accent mb-6 fade-up">
+      <span class="thinking-dot"></span> Atlas v3 — Now with AutoML 2.0
+    </div>
+    <h1 class="font-display text-5xl md:text-7xl font-bold tracking-tight fade-up" style="animation-delay:.1s">
+      Your <span class="gradient-text">AI Data Scientist</span>
+    </h1>
+    <p class="max-w-2xl mx-auto mt-6 text-lg fade-up" style="color: var(--fg-muted); animation-delay:.2s">
+      Upload any dataset and Atlas automatically analyzes, visualizes, models, explains,
+      and generates executive intelligence reports — in minutes, not weeks.
+    </p>
+    <div class="mt-9 flex items-center justify-center gap-3 fade-up" style="animation-delay:.3s">
+      <a href="{{ url_for('signup') }}" class="btn btn-accent btn-lg">Start free</a>
+      <a href="#how" class="btn btn-ghost btn-lg">
+        <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M8 5v14l11-7z"/></svg>
+        Watch demo
+      </a>
+    </div>
+    <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 fade-up" style="animation-delay:.4s">
+      <div><div class="text-3xl font-display font-bold"><span data-count="12480">0</span>+</div><div class="text-xs mt-1" style="color: var(--fg-subtle)">Datasets analyzed</div></div>
+      <div><div class="text-3xl font-display font-bold"><span data-count="98">0</span>%</div><div class="text-xs mt-1" style="color: var(--fg-subtle)">Privacy preserved</div></div>
+      <div><div class="text-3xl font-display font-bold"><span data-count="42">0</span>s</div><div class="text-xs mt-1" style="color: var(--fg-subtle)">Avg analysis time</div></div>
+      <div><div class="text-3xl font-display font-bold"><span data-count="350">0</span>+</div><div class="text-xs mt-1" style="color: var(--fg-subtle)">Enterprise teams</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="max-w-6xl mx-auto px-6 py-24">
+  <div class="text-center mb-16" data-reveal>
+    <div class="badge mb-4">Capabilities</div>
+    <h2 class="font-display text-4xl md:text-5xl font-semibold tracking-tight">An entire data team, in one engine.</h2>
+  </div>
+  <div class="grid md:grid-cols-3 gap-5">
+    {% for icon, title, desc in [
+      ('📊','Automated EDA','Statistical summaries, missingness, correlations — generated automatically.'),
+      ('🧠','Insight Engine','AI-written findings ranked by business impact and statistical confidence.'),
+      ('🎨','Visual Intelligence','30+ chart types planned and rendered without writing a single line of code.'),
+      ('🤖','AutoML Selection','Detects task type, trains, tunes, and benchmarks the right model class.'),
+      ('🔐','Privacy by Design','Your raw data never leaves your environment. Column names are protected.'),
+      ('📑','Executive Reports','Board-ready PDFs with findings, charts, and recommendations.')
+    ] %}
+    <div class="card card-hover" data-reveal>
+      <div class="text-2xl mb-3">{{ icon }}</div>
+      <div class="font-display font-semibold text-lg mb-1">{{ title }}</div>
+      <div class="text-sm" style="color: var(--fg-muted)">{{ desc }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="py-24" style="background: var(--bg-elev);">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16" data-reveal>
+      <div class="badge mb-4">How Atlas works</div>
+      <h2 class="font-display text-4xl md:text-5xl font-semibold tracking-tight">From CSV to C-suite report.</h2>
+    </div>
+    <div class="grid md:grid-cols-4 gap-4">
+      {% for n, title, desc in [
+        ('01','Upload','Drop a CSV. The Flask app sends it directly to main.py.'),
+        ('02','Privacy','Anonymize, encode, normalize — before any AI sees it.'),
+        ('03','Analyze','EDA + insights + visualizations + AutoML, in parallel.'),
+        ('04','Report','Polished executive deliverable, ready to share.')
+      ] %}
+      <div class="card" data-reveal>
+        <div class="font-mono text-xs mb-2" style="color: var(--accent)">{{ n }}</div>
+        <div class="font-display font-semibold text-lg mb-1">{{ title }}</div>
+        <div class="text-sm" style="color: var(--fg-muted)">{{ desc }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACY -->
+<section id="privacy" class="max-w-6xl mx-auto px-6 py-24">
+  <div class="grid md:grid-cols-2 gap-12 items-center">
+    <div data-reveal>
+      <div class="badge mb-4">Privacy Architecture</div>
+      <h2 class="font-display text-4xl font-semibold tracking-tight mb-4">Your data, in your control.</h2>
+      <p class="mb-6" style="color: var(--fg-muted)">Atlas was built privacy-first. Raw values, identifiers, and column names are protected before any model touches your dataset.</p>
+      <ul class="space-y-3 text-sm">
+        {% for p in ['Raw data never exposed to LLMs','Column names hashed before analysis','On-prem & VPC deployment options','SOC 2 Type II, GDPR, HIPAA ready'] %}
+        <li class="flex items-center gap-3"><span class="w-5 h-5 rounded-full flex items-center justify-center" style="background: var(--success); color: white;">✓</span>{{ p }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div id="neural-mount" class="h-96 rounded-2xl glass" data-reveal></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="py-24" style="background: var(--bg-elev);">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16" data-reveal>
+      <div class="badge mb-4">Pricing</div>
+      <h2 class="font-display text-4xl md:text-5xl font-semibold tracking-tight">Simple, transparent plans.</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-5">
+      {% for name, price, feats, accent in [
+        ('Starter','$0',['3 datasets / mo','Auto EDA','Basic reports'],False),
+        ('Professional','$49',['Unlimited datasets','AutoML','Team workspace','Priority support'],True),
+        ('Enterprise','Custom',['VPC deployment','SSO + SAML','Audit logs','Dedicated CSM'],False)
+      ] %}
+      <div class="card {% if accent %}ring-glow{% endif %}" data-reveal>
+        {% if accent %}<div class="badge badge-accent mb-3">Most popular</div>{% endif %}
+        <div class="font-display text-xl font-semibold">{{ name }}</div>
+        <div class="text-4xl font-display font-bold mt-3 mb-1">{{ price }}<span class="text-sm font-normal" style="color: var(--fg-muted)">{% if price.startswith('$') and price != '$0' %}/mo{% endif %}</span></div>
+        <ul class="my-6 space-y-2 text-sm">{% for f in feats %}<li>· {{ f }}</li>{% endfor %}</ul>
+        <a href="{{ url_for('signup') }}" class="btn {% if accent %}btn-accent{% else %}btn-ghost{% endif %} w-full">Choose {{ name }}</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="max-w-6xl mx-auto px-6 py-24">
+  <div class="text-center mb-12" data-reveal>
+    <div class="badge mb-4">Loved by data teams</div>
+    <h2 class="font-display text-4xl font-semibold tracking-tight">Trusted by analysts at 350+ companies.</h2>
+  </div>
+  <div class="grid md:grid-cols-3 gap-5">
+    {% for quote, name, role in [
+      ('Atlas does in 2 minutes what took our team a week. The reports are board-ready.','Sara K.','Head of Data, Lumen'),
+      ('Finally an AI tool that respects our compliance posture. VPC + audit logs sealed it.','Marcus T.','CISO, NovaBank'),
+      ('The insight ranking is uncanny. It surfaces things we missed for months.','Priya R.','Lead Analyst, Helix')
+    ] %}
+    <div class="card" data-reveal>
+      <p class="text-sm leading-relaxed mb-4">"{{ quote }}"</p>
+      <div class="text-xs" style="color: var(--fg-muted)"><b style="color: var(--fg)">{{ name }}</b> · {{ role }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="max-w-3xl mx-auto px-6 py-24">
+  <div class="text-center mb-10" data-reveal>
+    <h2 class="font-display text-4xl font-semibold tracking-tight">Questions, answered.</h2>
+  </div>
+  <div class="space-y-3">
+    {% for q, a in [
+      ('What file formats does Atlas accept?','This integrated pipeline currently accepts CSV files, matching main.py.'),
+      ('Where does my data live?','By default in our SOC 2 cloud. Enterprise teams can deploy Atlas in their own VPC.'),
+      ('Does Atlas send my data to OpenAI?','Never raw. Atlas anonymizes and encodes data before any model call.'),
+      ('Can I export the report?','Yes — PDF, DOCX, Notion, or shareable link.')
+    ] %}
+    <details class="card" data-reveal>
+      <summary class="cursor-pointer font-medium flex justify-between items-center">{{ q }}<span style="color: var(--fg-subtle)">+</span></summary>
+      <p class="mt-3 text-sm" style="color: var(--fg-muted)">{{ a }}</p>
+    </details>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="max-w-5xl mx-auto px-6 pb-24">
+  <div class="card text-center" style="background: var(--grad-accent); border: none; color: white; padding: 56px 24px;">
+    <h3 class="font-display text-3xl md:text-4xl font-semibold tracking-tight">Meet your new data scientist.</h3>
+    <p class="mt-3 opacity-90">Start analyzing in under a minute. No credit card required.</p>
+    <a href="{{ url_for('signup') }}" class="btn mt-6 inline-flex" style="background:white; color:#111;">Start free →</a>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="{{ url_for('static', filename='js/three-scenes.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AtlasGlobe(document.getElementById('hero-globe'));
+    AtlasNeural(document.getElementById('neural-mount'));
+  });
+</script>
+{% endblock %}

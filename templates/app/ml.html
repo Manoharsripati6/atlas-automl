@@ -1,0 +1,106 @@
+{% extends "app/_layout.html" %}
+{% block title %}Machine Learning - Atlas{% endblock %}
+{% block page_title %}Machine Learning Results{% endblock %}
+{% block page_subtitle %}{{ latest_run.filename or "No dataset" }}{% endblock %}
+{% block content %}
+{% if not ml %}
+<div class="max-w-2xl mx-auto card text-center">
+  <div class="font-display text-2xl font-semibold mb-2">No model results yet</div>
+  <p class="text-sm mb-4" style="color: var(--fg-muted)">Upload a CSV and the pipeline will train models with the last column as the target.</p>
+  <a href="{{ url_for('upload') }}" class="btn btn-accent">Upload dataset</a>
+</div>
+{% else %}
+{% set best = ml.best_model or {} %}
+<div class="grid md:grid-cols-3 gap-4 mb-6">
+  <div class="card">
+    <div class="text-xs" style="color: var(--fg-muted)">Detected task</div>
+    <div class="font-display text-xl font-semibold mt-1">{{ ml.task_type|title }}</div>
+    <div class="text-xs mt-1" style="color: var(--fg-subtle)">target = {{ ml.target_column }}</div>
+  </div>
+  <div class="card ring-glow">
+    <div class="text-xs" style="color: var(--fg-muted)">Best model</div>
+    <div class="font-display text-xl font-semibold mt-1 gradient-text">{{ best.model or "Unavailable" }}</div>
+    <div class="text-xs mt-1" style="color: var(--fg-subtle)">
+      {% if ml.task_type == "classification" %}
+      Accuracy {{ best.accuracy }} · F1 {{ best.f1_score }}
+      {% else %}
+      R2 {{ best.r2_score }} · MAE {{ best.mae }}
+      {% endif %}
+    </div>
+  </div>
+  <div class="card">
+    <div class="text-xs" style="color: var(--fg-muted)">Benchmarked models</div>
+    <div class="font-display text-xl font-semibold mt-1">{{ ml.top_models|length }}</div>
+    <div class="text-xs mt-1" style="color: var(--fg-subtle)">top models returned by main.py</div>
+  </div>
+</div>
+
+<div class="card mb-6">
+  <div class="font-display font-semibold mb-4">Leaderboard</div>
+  <table class="w-full text-sm">
+    <thead>
+      <tr style="color: var(--fg-muted); border-bottom: 1px solid var(--border)">
+        <th class="text-left py-2 font-medium">Model</th>
+        {% if ml.task_type == "classification" %}
+        <th class="text-left py-2 font-medium">Accuracy</th><th class="text-left py-2 font-medium">F1</th>
+        {% else %}
+        <th class="text-left py-2 font-medium">R2</th><th class="text-left py-2 font-medium">MAE</th>
+        {% endif %}
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in ml.top_models %}
+      <tr class="border-b" style="border-color: var(--border)">
+        <td class="py-3 font-medium">{{ row.model }} {% if row.model == best.model %}<span class="badge badge-success ml-2">Best</span>{% endif %}</td>
+        {% if ml.task_type == "classification" %}
+        <td>{{ row.accuracy }}</td><td>{{ row.f1_score }}</td>
+        {% else %}
+        <td>{{ row.r2_score }}</td><td>{{ row.mae }}</td>
+        {% endif %}
+        <td class="text-right"><a href="{{ url_for('feature_importance') }}" class="text-xs" style="color: var(--accent)">Plots</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="grid md:grid-cols-2 gap-4">
+  <div class="card">
+    <div class="font-display font-semibold mb-3">Model comparison</div>
+    <canvas id="cmp" height="200"></canvas>
+  </div>
+  <div class="card">
+    <div class="font-display font-semibold mb-3">Generated model plots</div>
+    {% set ml_plots = latest_run.result.ml_plots %}
+    {% if ml_plots %}
+      <div class="space-y-2">
+      {% for path in ml_plots %}
+        <a class="block text-sm" style="color: var(--accent)" href="{{ output_url(path) }}">{{ path.split('/')[-1] }}</a>
+      {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-sm" style="color: var(--fg-muted)">No model plots were generated for this run.</p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if ml %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const rows = {{ ml.top_models|tojson }};
+  const task = {{ ml.task_type|tojson }};
+  const metric = task === 'classification' ? 'accuracy' : 'r2_score';
+  new Chart(document.getElementById('cmp'), {
+    type: 'bar',
+    data: {
+      labels: rows.map(r => r.model),
+      datasets: [{ data: rows.map(r => r[metric]), backgroundColor: '#6366f1' }]
+    },
+    options: { plugins: { legend: { display: false } } }
+  });
+</script>
+{% endif %}
+{% endblock %}

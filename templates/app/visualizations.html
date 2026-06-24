@@ -1,0 +1,46 @@
+{% extends "app/_layout.html" %}
+{% block title %}Visualizations - Atlas{% endblock %}
+{% block page_title %}Visualization Gallery{% endblock %}
+{% block page_subtitle %}{{ latest_run.filename or "No dataset" }}{% endblock %}
+{% block content %}
+{% set total = (plots|length) + (ml_plots|length) %}
+{% if not has_results %}
+<div class="max-w-2xl mx-auto card text-center">
+  <div class="font-display text-2xl font-semibold mb-2">No visualizations yet</div>
+  <p class="text-sm mb-4" style="color: var(--fg-muted)">Generated plots from tools/visualization_generator.py and tools/ml_visualizations.py appear here.</p>
+  <a href="{{ url_for('upload') }}" class="btn btn-accent">Upload dataset</a>
+</div>
+{% elif total == 0 %}
+<div class="card text-center">
+  <div class="font-display text-xl font-semibold mb-2">No plots were generated</div>
+  <p class="text-sm" style="color: var(--fg-muted)">The selected columns may not have met the chart requirements.</p>
+</div>
+{% else %}
+<div class="flex items-center justify-between mb-5">
+  <div class="text-sm" style="color: var(--fg-muted)">{{ total }} generated plots</div>
+  <a href="{{ url_for('report') }}" class="btn btn-accent btn-sm">Open report</a>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-4">
+  {% for plot in plots %}
+  <div class="card card-hover fade-up">
+    <div class="flex justify-between mb-3">
+      <div class="font-medium text-sm">{{ plot.type|title }}</div>
+      <span class="badge">{{ plot.features|join(", ") }}</span>
+    </div>
+    <img src="{{ output_url(plot.path) }}" alt="{{ plot.type }} plot" class="w-full rounded-lg" style="background: white;">
+  </div>
+  {% endfor %}
+
+  {% for path in ml_plots %}
+  <div class="card card-hover fade-up">
+    <div class="flex justify-between mb-3">
+      <div class="font-medium text-sm">{{ path.split('/')[-1].replace('_', ' ').replace('.png', '')|title }}</div>
+      <span class="badge">Model</span>
+    </div>
+    <img src="{{ output_url(path) }}" alt="ML plot" class="w-full rounded-lg" style="background: white;">
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

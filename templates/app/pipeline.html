@@ -1,0 +1,56 @@
+{% extends "app/_layout.html" %}
+{% block title %}Analysis Pipeline - Atlas{% endblock %}
+{% block page_title %}Analysis Pipeline{% endblock %}
+{% block page_subtitle %}{{ latest_run.filename or "No dataset" }}{% endblock %}
+{% block content %}
+{% if not result %}
+<div class="max-w-2xl mx-auto card text-center">
+  <div class="font-display text-2xl font-semibold mb-2">Upload a CSV to run the pipeline</div>
+  {% if latest_run.error %}<p class="text-sm mb-4" style="color: var(--fg-muted)">{{ latest_run.error }}</p>{% endif %}
+  <a href="{{ url_for('upload') }}" class="btn btn-accent">Upload dataset</a>
+</div>
+{% else %}
+<div class="max-w-3xl mx-auto">
+  <div class="card mb-6 fade-up">
+    <div class="flex justify-between items-center mb-3">
+      <div class="font-display font-semibold">Completed run</div>
+      <div class="text-sm font-mono">100%</div>
+    </div>
+    <div class="h-1.5 rounded-full overflow-hidden" style="background: var(--border)">
+      <div class="h-full" style="width:100%; background: var(--grad-accent);"></div>
+    </div>
+  </div>
+
+  <div class="space-y-0">
+    {% set steps = [
+      ('Dataset ingest', latest_run.rows ~ ' rows, ' ~ latest_run.columns ~ ' columns'),
+      ('Privacy preprocessing', (result.actions|length) ~ ' actions recorded'),
+      ('EDA engine', result.eda_report.numeric_columns|length ~ ' numeric and ' ~ result.eda_report.categorical_columns|length ~ ' categorical columns'),
+      ('Insight engine', (result.insights|length) ~ ' insights generated'),
+      ('AutoML engine', result.ml_summary.task_type ~ ' task, target ' ~ result.ml_summary.target_column),
+      ('Visualization engines', (result.plots|length + result.ml_plots|length) ~ ' plots generated'),
+      ('Report generator', 'Final report saved to outputs/final_report.txt')
+    ] %}
+    {% for name, desc in steps %}
+    <div class="pipeline-node done">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg" style="background: var(--bg-elev)">✓</div>
+      <div class="flex-1">
+        <div class="font-medium text-sm">{{ name }}</div>
+        <div class="text-xs" style="color: var(--fg-muted)">{{ desc }}</div>
+      </div>
+      <span class="badge badge-success">Done</span>
+    </div>
+    {% if not loop.last %}<div class="pipeline-connector"></div>{% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="mt-8 text-center">
+    <div class="flex justify-center gap-2">
+      <a href="{{ url_for('eda') }}" class="btn btn-ghost">View EDA</a>
+      <a href="{{ url_for('insights') }}" class="btn btn-ghost">Insights</a>
+      <a href="{{ url_for('report') }}" class="btn btn-accent">Open report</a>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

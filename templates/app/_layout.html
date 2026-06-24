@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="flex">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="{{ url_for('dashboard') }}" class="flex items-center gap-2 px-3 py-2 mb-4">
+      <div class="w-7 h-7 rounded-lg" style="background: var(--grad-accent); box-shadow: var(--shadow-glow);"></div>
+      <span class="font-display font-semibold text-lg">Atlas</span>
+    </a>
+    <button class="flex items-center gap-2 px-3 py-2 mb-3 rounded-lg text-sm" style="background: var(--surface); border: 1px solid var(--border); color: var(--fg-muted);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      Search<span class="ml-auto kbd">⌘K</span>
+    </button>
+
+    {% set nav = [
+      ('overview',       'Overview',        url_for('dashboard')),
+      ('datasets',       'Datasets',        url_for('upload')),
+      ('analysis',       'Analysis',        url_for('analyze')),
+      ('visualizations', 'Visualizations',  url_for('visualizations')),
+      ('ml',             'Machine Learning',url_for('ml_results')),
+      ('reports',        'Reports',         url_for('report')),
+    ] %}
+    {% for key, label, href in nav %}
+    <a href="{{ href }}" class="nav-item {% if active == key %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      {{ label }}
+    </a>
+    {% endfor %}
+
+    <div class="nav-section">Workspace</div>
+    {% set nav2 = [
+      ('team',     'Team',     url_for('team')),
+      ('api',      'API Keys', url_for('api_keys')),
+      ('billing',  'Billing',  url_for('billing')),
+      ('settings', 'Settings', url_for('settings')),
+      ('admin',    'Admin',    url_for('admin')),
+    ] %}
+    {% for key, label, href in nav2 %}
+    <a href="{{ href }}" class="nav-item {% if active == key %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      {{ label }}
+    </a>
+    {% endfor %}
+
+    <div class="mt-auto card" style="padding: 14px;">
+      <div class="text-xs mb-1" style="color: var(--fg-subtle)">Workspace usage</div>
+      <div class="text-sm font-medium mb-2">68% of 100 GB</div>
+      <div class="h-1.5 rounded-full overflow-hidden" style="background: var(--border);">
+        <div class="h-full" style="width:68%; background: var(--grad-accent);"></div>
+      </div>
+      <a href="{{ url_for('billing') }}" class="block mt-3 text-xs" style="color: var(--accent)">Upgrade →</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="flex-1 min-w-0">
+    <div class="topbar">
+      <div class="flex items-center gap-3">
+        <h1 class="font-display text-base font-semibold">{% block page_title %}Workspace{% endblock %}</h1>
+        <span class="badge">{% block page_subtitle %}{% endblock %}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="btn btn-ghost btn-sm" data-theme-toggle title="Toggle theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+        <button class="btn btn-ghost btn-sm" title="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </button>
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold" style="background: var(--grad-accent); color: white;">JS</div>
+      </div>
+    </div>
+    <div class="p-8 max-w-7xl mx-auto">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

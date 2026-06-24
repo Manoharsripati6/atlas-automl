@@ -1,0 +1,34 @@
+{% extends "auth/base_auth.html" %}
+{% block title %}Sign in to Atlas{% endblock %}
+{% block auth %}
+<div class="text-center mb-6">
+  <h1 class="font-display text-2xl font-semibold">Welcome back</h1>
+  <p class="text-sm mt-1" style="color: var(--fg-muted)">Sign in to your Atlas workspace.</p>
+</div>
+
+<div class="grid grid-cols-3 gap-2 mb-5">
+  {% for label in ['Google','Microsoft','GitHub'] %}
+  <button class="btn btn-ghost btn-sm">{{ label }}</button>
+  {% endfor %}
+</div>
+<div class="flex items-center gap-3 my-5 text-xs" style="color: var(--fg-subtle)">
+  <div class="divider"></div>or<div class="divider"></div>
+</div>
+
+<form method="POST" action="{{ url_for('login') }}" class="space-y-4" onsubmit="return false;">
+  <div><label class="label">Email</label><input type="email" name="email" class="input" placeholder="you@company.com" required></div>
+  <div>
+    <label class="label">Password</label>
+    <div class="relative">
+      <input id="pw" type="password" name="password" class="input pr-12" placeholder="••••••••" required>
+      <button type="button" onclick="const i=document.getElementById('pw'); i.type=i.type==='password'?'text':'password';" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs" style="color: var(--fg-muted)">Show</button>
+    </div>
+  </div>
+  <div class="flex items-center justify-between text-xs">
+    <label class="flex items-center gap-2"><input type="checkbox" class="rounded"> Remember me</label>
+    <a href="{{ url_for('forgot_password') }}" style="color: var(--accent)">Forgot password?</a>
+  </div>
+  <button type="submit" onclick="window.location='{{ url_for('dashboard') }}'" class="btn btn-accent w-full">Sign in</button>
+</form>
+{% endblock %}
+{% block auth_footer %}Don't have an account? <a href="{{ url_for('signup') }}" style="color: var(--accent)">Sign up</a>{% endblock %}

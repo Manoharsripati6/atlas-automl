@@ -1,0 +1,111 @@
+{% extends "app/_layout.html" %}
+{% block title %}Upload - Atlas{% endblock %}
+{% block page_title %}Upload dataset{% endblock %}
+{% block page_subtitle %}CSV pipeline input{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+  <form id="upload-form" enctype="multipart/form-data">
+    <div id="dz" class="dropzone fade-up">
+      <div class="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center float" style="background: var(--grad-accent); color: white; box-shadow: var(--shadow-glow);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <div class="font-display text-xl font-semibold">Drop your CSV</div>
+      <p class="text-sm mt-1" style="color: var(--fg-muted)">or click to browse. Analysis starts after upload.</p>
+      <input id="file" name="file" type="file" accept=".csv,text/csv" hidden>
+    </div>
+  </form>
+
+  <div id="status" class="hidden mt-6 card fade-up">
+    <div class="flex items-center justify-between mb-2">
+      <div class="font-medium" id="fname">dataset.csv</div>
+      <div class="text-xs" id="fsize" style="color: var(--fg-muted)">0 KB</div>
+    </div>
+    <div class="h-1.5 rounded-full overflow-hidden" style="background: var(--border)">
+      <div id="bar" class="h-full transition-all" style="width:0%; background: var(--grad-accent);"></div>
+    </div>
+    <div class="flex justify-between text-xs mt-2">
+      <span id="pct" style="color: var(--fg-muted)">0%</span>
+      <span id="msg" style="color: var(--fg-muted)">Preparing</span>
+    </div>
+  </div>
+
+  <div id="error" class="hidden mt-6 card" style="border-color: rgba(239, 68, 68, .5);">
+    <div class="font-medium">Analysis could not finish</div>
+    <p id="error-text" class="text-sm mt-1" style="color: var(--fg-muted)"></p>
+  </div>
+
+  <div id="meta" class="hidden mt-6 grid grid-cols-3 gap-3">
+    <div class="card text-center"><div class="text-xs" style="color: var(--fg-muted)">Rows</div><div class="font-display text-2xl font-semibold mt-1" id="m-rows">0</div></div>
+    <div class="card text-center"><div class="text-xs" style="color: var(--fg-muted)">Columns</div><div class="font-display text-2xl font-semibold mt-1" id="m-cols">0</div></div>
+    <div class="card text-center"><div class="text-xs" style="color: var(--fg-muted)">Size</div><div class="font-display text-2xl font-semibold mt-1" id="m-size">0 MB</div></div>
+  </div>
+
+  <div id="next" class="hidden mt-6 text-center">
+    <a href="{{ url_for('analyze') }}" class="btn btn-accent btn-lg">View analysis</a>
+  </div>
+
+  <div class="mt-10 grid md:grid-cols-3 gap-4">
+    {% for t, d in [
+      ('Privacy preprocessing','Duplicates, anonymous columns, imputation, encoding, and scaling run through tools/privacy_preprocessor.py.'),
+      ('EDA and insights','The app displays outputs from tools/eda_engine.py and tools/insight_engine.py.'),
+      ('AutoML and report','The last column is modeled as the target, then the report is generated from main.py.')
+    ] %}
+    <div class="card"><div class="font-medium">{{ t }}</div><div class="text-xs mt-1" style="color: var(--fg-muted)">{{ d }}</div></div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  const dz = document.getElementById('dz');
+  const file = document.getElementById('file');
+  const bar = document.getElementById('bar');
+  const pct = document.getElementById('pct');
+  const msg = document.getElementById('msg');
+  const errorBox = document.getElementById('error');
+  const errorText = document.getElementById('error-text');
+
+  dz.addEventListener('click', () => file.click());
+  ['dragover','dragenter'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.remove('drag'); }));
+  dz.addEventListener('drop', ev => upload(ev.dataTransfer.files[0]));
+  file.addEventListener('change', ev => upload(ev.target.files[0]));
+
+  function setProgress(value, label) {
+    bar.style.width = value + '%';
+    pct.textContent = value + '%';
+    msg.textContent = label;
+  }
+
+  async function upload(f) {
+    if (!f) return;
+    errorBox.classList.add('hidden');
+    document.getElementById('status').classList.remove('hidden');
+    document.getElementById('meta').classList.add('hidden');
+    document.getElementById('next').classList.add('hidden');
+    document.getElementById('fname').textContent = f.name;
+    document.getElementById('fsize').textContent = (f.size / 1024 / 1024).toFixed(2) + ' MB';
+    setProgress(20, 'Uploading');
+
+    const data = new FormData();
+    data.append('file', f);
+
+    try {
+      setProgress(45, 'Running pipeline');
+      const res = await fetch('{{ url_for("upload") }}', { method: 'POST', body: data });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.message || 'Upload failed');
+
+      setProgress(100, 'Complete');
+      document.getElementById('meta').classList.remove('hidden');
+      document.getElementById('next').classList.remove('hidden');
+      Atlas.countUp(document.getElementById('m-rows'), payload.rows);
+      Atlas.countUp(document.getElementById('m-cols'), payload.columns);
+      document.getElementById('m-size').textContent = (f.size / 1024 / 1024).toFixed(1) + ' MB';
+    } catch (err) {
+      setProgress(100, 'Failed');
+      errorText.textContent = err.message;
+      errorBox.classList.remove('hidden');
+    }
+  }
+</script>
+{% endblock %}

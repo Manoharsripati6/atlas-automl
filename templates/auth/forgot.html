@@ -1,0 +1,13 @@
+{% extends "auth/base_auth.html" %}
+{% block title %}Reset your password{% endblock %}
+{% block auth %}
+<div class="text-center mb-6">
+  <h1 class="font-display text-2xl font-semibold">Reset your password</h1>
+  <p class="text-sm mt-1" style="color: var(--fg-muted)">We'll email you a secure reset link.</p>
+</div>
+<form class="space-y-4" onsubmit="event.preventDefault(); this.querySelector('button').textContent='✓ Email sent';">
+  <div><label class="label">Email</label><input type="email" class="input" placeholder="you@company.com" required></div>
+  <button class="btn btn-accent w-full">Send reset link</button>
+</form>
+{% endblock %}
+{% block auth_footer %}<a href="{{ url_for('login') }}" style="color: var(--accent)">← Back to sign in</a>{% endblock %}

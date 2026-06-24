@@ -1,0 +1,42 @@
+{% extends "app/_layout.html" %}
+{% block title %}Team — Atlas{% endblock %}
+{% block page_title %}Team Workspace{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <div>
+    <h2 class="font-display text-xl font-semibold">Acme Analytics</h2>
+    <p class="text-xs" style="color: var(--fg-muted)">8 members · 3 roles</p>
+  </div>
+  <button class="btn btn-accent btn-sm">+ Invite member</button>
+</div>
+
+<div class="card">
+  <table class="w-full text-sm">
+    <thead><tr style="color: var(--fg-muted); border-bottom: 1px solid var(--border)"><th class="text-left py-2 font-medium">Member</th><th class="text-left">Email</th><th class="text-left">Role</th><th class="text-left">Last active</th><th></th></tr></thead>
+    <tbody>
+      {% for n, e, r, t in [
+        ('Jane Smith','jane@acme.com','Admin','2m ago'),
+        ('Marcus Tate','marcus@acme.com','Admin','1h ago'),
+        ('Priya Rao','priya@acme.com','Analyst','3h ago'),
+        ('Lin Wei','lin@acme.com','Analyst','yesterday'),
+        ('Diego Alvarez','diego@acme.com','Analyst','2d ago'),
+        ('Sara Kim','sara@acme.com','Viewer','3d ago'),
+        ('Tomás Reyes','tomas@acme.com','Viewer','1w ago'),
+      ] %}
+      <tr class="border-b" style="border-color: var(--border)">
+        <td class="py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold" style="background: var(--grad-accent); color: white;">{{ n[0] }}{{ n.split()[1][0] }}</div><span class="font-medium">{{ n }}</span></div></td>
+        <td>{{ e }}</td>
+        <td><span class="badge {% if r=='Admin' %}badge-accent{% elif r=='Analyst' %}badge-success{% endif %}">{{ r }}</span></td>
+        <td>{{ t }}</td>
+        <td class="text-right"><button class="text-xs" style="color: var(--fg-muted)">Manage</button></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="grid md:grid-cols-2 gap-4 mt-6">
+  <div class="card"><div class="font-display font-semibold mb-2">Shared datasets</div><div class="text-sm" style="color: var(--fg-muted)">12 datasets shared across the workspace.</div></div>
+  <div class="card"><div class="font-display font-semibold mb-2">Shared reports</div><div class="text-sm" style="color: var(--fg-muted)">7 reports published this quarter.</div></div>
+</div>
+{% endblock %}

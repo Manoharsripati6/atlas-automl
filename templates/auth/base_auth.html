@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="min-h-screen relative overflow-hidden">
+  <div id="auth-bg" class="absolute inset-0" style="background: radial-gradient(ellipse at 30% 20%, rgba(99,102,241,.2), transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(6,182,212,.15), transparent 50%);"></div>
+  <div id="auth-particles" class="absolute inset-0 pointer-events-none"></div>
+
+  <header class="relative z-10 max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+    <a href="{{ url_for('landing') }}" class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg" style="background: var(--grad-accent); box-shadow: var(--shadow-glow);"></div>
+      <span class="font-display font-semibold text-lg">Atlas</span>
+    </a>
+    <a href="{{ url_for('landing') }}" class="btn btn-ghost btn-sm">Back to site</a>
+  </header>
+
+  <main class="relative z-10 flex items-center justify-center px-6 py-10">
+    <div class="w-full max-w-md fade-up">
+      <div class="glass-strong rounded-2xl p-8" style="box-shadow: var(--shadow-lg);">
+        {% block auth %}{% endblock %}
+      </div>
+      <p class="text-center text-xs mt-6" style="color: var(--fg-subtle)">{% block auth_footer %}{% endblock %}</p>
+    </div>
+  </main>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="{{ url_for('static', filename='js/three-scenes.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    AtlasParticles(document.getElementById('auth-particles'), 60);
+  });
+</script>
+{% endblock %}

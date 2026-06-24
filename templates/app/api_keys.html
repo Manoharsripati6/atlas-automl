@@ -1,0 +1,30 @@
+{% extends "app/_layout.html" %}
+{% block title %}API Keys — Atlas{% endblock %}
+{% block page_title %}API Keys{% endblock %}
+{% block content %}
+<div class="card mb-6 flex justify-between items-center">
+  <div>
+    <div class="font-display font-semibold">Personal access tokens</div>
+    <div class="text-xs mt-1" style="color: var(--fg-muted)">Use these to authenticate against the Atlas REST API.</div>
+  </div>
+  <button class="btn btn-accent btn-sm">+ Generate key</button>
+</div>
+
+<div class="card">
+  <table class="w-full text-sm">
+    <thead><tr style="color: var(--fg-muted); border-bottom: 1px solid var(--border)"><th class="text-left py-2 font-medium">Name</th><th class="text-left">Key</th><th class="text-left">Created</th><th class="text-left">Last used</th><th></th></tr></thead>
+    <tbody>
+      {% for n,k,c,l in [('Production','sk_live_••••••3f9a','Jan 4, 2026','2m ago'),('Staging','sk_test_••••••91ab','Dec 12, 2025','3h ago'),('Local dev','sk_dev_••••••42de','Nov 1, 2025','5d ago')] %}
+      <tr class="border-b" style="border-color: var(--border)"><td class="py-3 font-medium">{{ n }}</td><td class="font-mono text-xs">{{ k }}</td><td>{{ c }}</td><td>{{ l }}</td><td class="text-right"><button class="text-xs" style="color: var(--danger)">Revoke</button></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card mt-6">
+  <div class="font-display font-semibold mb-3">Quick start</div>
+  <pre class="text-xs font-mono p-4 rounded-lg overflow-auto" style="background: var(--bg-elev); color: var(--fg-muted)">curl -X POST https://api.atlas.ai/v1/analyze \
+  -H "Authorization: Bearer $ATLAS_API_KEY" \
+  -F file=@dataset.csv</pre>
+</div>
+{% endblock %}

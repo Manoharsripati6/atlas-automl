@@ -1,0 +1,98 @@
+{% extends "app/_layout.html" %}
+{% block title %}EDA - Atlas{% endblock %}
+{% block page_title %}Exploratory Analysis{% endblock %}
+{% block page_subtitle %}{{ latest_run.filename or "No dataset" }}{% endblock %}
+{% block content %}
+{% if not eda %}
+<div class="max-w-2xl mx-auto card text-center">
+  <div class="font-display text-2xl font-semibold mb-2">No EDA report yet</div>
+  <p class="text-sm mb-4" style="color: var(--fg-muted)">Run the pipeline from a CSV upload to populate this page.</p>
+  <a href="{{ url_for('upload') }}" class="btn btn-accent">Upload dataset</a>
+</div>
+{% else %}
+{% set missing_total = eda.missing_values.values()|sum %}
+{% set corr_count = eda.correlations|length %}
+<div class="grid md:grid-cols-4 gap-4 mb-6">
+  {% for label, value, sub in [
+    ('Rows', "{:,}".format(eda.rows), 'after preprocessing'),
+    ('Columns', eda.columns, 'total'),
+    ('Missing values', missing_total, 'after preprocessing'),
+    ('Duplicates', eda.duplicates, 'detected'),
+    ('Numeric columns', eda.numeric_columns|length, ''),
+    ('Categorical columns', eda.categorical_columns|length, ''),
+    ('Correlation columns', corr_count, 'numeric matrix'),
+    ('Target column', latest_run.result.ml_summary.target_column, 'last column')
+  ] %}
+  <div class="card card-hover fade-up">
+    <div class="text-xs" style="color: var(--fg-muted)">{{ label }}</div>
+    <div class="font-display text-2xl font-semibold mt-1">{{ value }}</div>
+    {% if sub %}<div class="text-xs mt-1" style="color: var(--fg-subtle)">{{ sub }}</div>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="grid lg:grid-cols-2 gap-4">
+  <div class="card">
+    <div class="font-display font-semibold mb-3">Numeric summary</div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead><tr style="color: var(--fg-muted); border-bottom: 1px solid var(--border)"><th class="text-left py-2">Column</th><th>Mean</th><th>Std</th><th>Min</th><th>Max</th></tr></thead>
+        <tbody>
+          {% for col, stats in eda.numeric_summary.items() %}
+          <tr class="border-b" style="border-color: var(--border)"><td class="py-2 font-medium">{{ col }}</td><td class="text-center">{{ stats.mean }}</td><td class="text-center">{{ stats.std }}</td><td class="text-center">{{ stats.min }}</td><td class="text-center">{{ stats.max }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="font-display font-semibold mb-3">Missing values</div>
+    <canvas id="missingChart" height="220"></canvas>
+  </div>
+
+  <div class="card lg:col-span-2">
+    <div class="font-display font-semibold mb-3">Correlation overview</div>
+    {% if eda.correlations %}
+    <canvas id="corrChart" height="120"></canvas>
+    {% else %}
+    <p class="text-sm" style="color: var(--fg-muted)">At least two numeric columns are required for correlation output.</p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if eda %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--fg-muted');
+  Chart.defaults.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border');
+
+  const missing = {{ eda.missing_values|tojson }};
+  new Chart(document.getElementById('missingChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(missing),
+      datasets: [{ data: Object.values(missing), backgroundColor: '#06b6d4' }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { maxRotation: 60, minRotation: 30 } } } }
+  });
+
+  const corr = {{ eda.correlations|tojson }};
+  const corrCanvas = document.getElementById('corrChart');
+  if (corrCanvas) {
+    const labels = Object.keys(corr);
+    const strengths = labels.map(a => {
+      const vals = Object.entries(corr[a]).filter(([b]) => b !== a).map(([, v]) => Math.abs(v));
+      return vals.length ? Math.max(...vals) : 0;
+    });
+    new Chart(corrCanvas, {
+      type: 'line',
+      data: { labels, datasets: [{ data: strengths, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,.15)', fill: true, tension: .35 }] },
+      options: { plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 1 } } }
+    });
+  }
+</script>
+{% endif %}
+{% endblock %}

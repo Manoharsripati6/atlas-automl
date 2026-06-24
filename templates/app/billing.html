@@ -1,0 +1,41 @@
+{% extends "app/_layout.html" %}
+{% block title %}Billing — Atlas{% endblock %}
+{% block page_title %}Billing & Subscription{% endblock %}
+{% block content %}
+<div class="card mb-6 flex flex-col md:flex-row justify-between gap-4">
+  <div>
+    <div class="text-xs" style="color: var(--fg-muted)">Current plan</div>
+    <div class="font-display text-2xl font-semibold mt-1">Professional</div>
+    <div class="text-xs mt-1" style="color: var(--fg-subtle)">Renews Mar 14, 2026 · $49/mo</div>
+  </div>
+  <div class="flex items-center gap-2"><button class="btn btn-ghost">Manage payment</button><button class="btn btn-accent">Upgrade</button></div>
+</div>
+
+<div class="grid md:grid-cols-3 gap-5">
+  {% for name, price, feats, accent in [
+    ('Starter','$0',['3 datasets / month','Auto EDA','Basic reports','Community support'],False),
+    ('Professional','$49',['Unlimited datasets','AutoML engine','Team workspace','Priority support','API access'],True),
+    ('Enterprise','Custom',['VPC deployment','SSO + SAML','Audit logs','Dedicated CSM','SLA 99.99%'],False)
+  ] %}
+  <div class="card {% if accent %}ring-glow{% endif %}">
+    {% if accent %}<div class="badge badge-accent mb-2">Current</div>{% endif %}
+    <div class="font-display text-lg font-semibold">{{ name }}</div>
+    <div class="text-3xl font-display font-bold mt-2">{{ price }}<span class="text-sm font-normal" style="color: var(--fg-muted)">{% if '$' in price and price != '$0' %}/mo{% endif %}</span></div>
+    <ul class="my-5 space-y-1 text-sm" style="color: var(--fg-muted)">{% for f in feats %}<li>· {{ f }}</li>{% endfor %}</ul>
+    <button class="btn {% if accent %}btn-ghost{% else %}btn-accent{% endif %} w-full">{% if accent %}Current plan{% else %}Switch to {{ name }}{% endif %}</button>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card mt-6">
+  <div class="font-display font-semibold mb-3">Invoices</div>
+  <table class="w-full text-sm">
+    <thead><tr style="color: var(--fg-muted); border-bottom: 1px solid var(--border)"><th class="text-left py-2 font-medium">Date</th><th class="text-left">Amount</th><th class="text-left">Status</th><th></th></tr></thead>
+    <tbody>
+      {% for d,a in [('Feb 14, 2026','$49.00'),('Jan 14, 2026','$49.00'),('Dec 14, 2025','$49.00')] %}
+      <tr class="border-b" style="border-color: var(--border)"><td class="py-3">{{ d }}</td><td>{{ a }}</td><td><span class="badge badge-success">Paid</span></td><td class="text-right"><a href="#" class="text-xs" style="color: var(--accent)">Download</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "app/_layout.html" %}
+{% block title %}Insights - Atlas{% endblock %}
+{% block page_title %}Insights{% endblock %}
+{% block page_subtitle %}{{ latest_run.filename or "No dataset" }}{% endblock %}
+{% block content %}
+{% if not has_results %}
+<div class="max-w-2xl mx-auto card text-center">
+  <div class="font-display text-2xl font-semibold mb-2">No insights yet</div>
+  <p class="text-sm mb-4" style="color: var(--fg-muted)">Upload a CSV to generate findings from the EDA report.</p>
+  <a href="{{ url_for('upload') }}" class="btn btn-accent">Upload dataset</a>
+</div>
+{% elif not insights %}
+<div class="card text-center">
+  <div class="font-display text-xl font-semibold mb-2">No high-signal issues found</div>
+  <p class="text-sm" style="color: var(--fg-muted)">The current insight engine only flags missing values and strong correlations above 0.7.</p>
+</div>
+{% else %}
+<div class="grid md:grid-cols-2 gap-4">
+  {% for insight in insights %}
+  <div class="card card-hover fade-up">
+    <div class="flex justify-between items-start mb-2">
+      <div class="font-display font-semibold">Finding {{ loop.index }}</div>
+      <span class="badge badge-accent">Generated</span>
+    </div>
+    <p class="text-sm" style="color: var(--fg-muted)">{{ insight }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

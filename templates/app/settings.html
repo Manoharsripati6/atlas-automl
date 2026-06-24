@@ -1,0 +1,44 @@
+{% extends "app/_layout.html" %}
+{% block title %}Settings — Atlas{% endblock %}
+{% block page_title %}Settings{% endblock %}
+{% block content %}
+<div class="grid lg:grid-cols-[200px_1fr] gap-8">
+  <nav class="space-y-1 text-sm">
+    {% for t in ['Profile','Notifications','Security','API Keys','Theme','Organization'] %}
+    <a href="#" class="nav-item {% if loop.first %}active{% endif %}">{{ t }}</a>{% endfor %}
+  </nav>
+  <div class="space-y-6">
+    <div class="card">
+      <div class="font-display font-semibold mb-4">Profile</div>
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center text-xl font-semibold" style="background: var(--grad-accent); color: white;">JS</div>
+        <button class="btn btn-ghost btn-sm">Change avatar</button>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div><label class="label">Full name</label><input class="input" value="Jane Smith"></div>
+        <div><label class="label">Email</label><input class="input" value="jane@acme.com"></div>
+        <div><label class="label">Role</label><input class="input" value="Head of Analytics"></div>
+        <div><label class="label">Timezone</label><input class="input" value="America/Los_Angeles"></div>
+      </div>
+      <div class="mt-5 flex justify-end gap-2"><button class="btn btn-ghost btn-sm">Cancel</button><button class="btn btn-accent btn-sm">Save changes</button></div>
+    </div>
+
+    <div class="card">
+      <div class="font-display font-semibold mb-4">Notifications</div>
+      {% for label in ['Analysis complete','Report ready','Weekly digest','Team mentions'] %}
+      <div class="flex justify-between items-center py-3 border-b" style="border-color: var(--border)">
+        <div class="text-sm">{{ label }}</div>
+        <input type="checkbox" {% if loop.first or loop.last %}checked{% endif %}>
+      </div>{% endfor %}
+    </div>
+
+    <div class="card">
+      <div class="font-display font-semibold mb-4">Theme</div>
+      <div class="flex gap-3">
+        <button class="card flex-1 text-left card-hover" data-theme-toggle><div class="text-sm font-medium">Dark</div><div class="text-xs" style="color: var(--fg-muted)">Default</div></button>
+        <button class="card flex-1 text-left card-hover" data-theme-toggle><div class="text-sm font-medium">Light</div><div class="text-xs" style="color: var(--fg-muted)">Bright surfaces</div></button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
