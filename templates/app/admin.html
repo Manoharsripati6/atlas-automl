@@ -1,29 +1,54 @@
 {% extends "app/_layout.html" %}
-{% block title %}Admin — Atlas{% endblock %}
+{% block title %}Admin - Atlas{% endblock %}
 {% block page_title %}Admin Console{% endblock %}
+{% block page_subtitle %}Premium admin access{% endblock %}
 {% block content %}
 <div class="grid md:grid-cols-4 gap-4 mb-6">
-  {% for l,v in [('Organizations','248'),('Active users','3,412'),('Datasets processed','58,920'),('Uptime','99.99%')] %}
+  {% for l,v in [
+    ('Users', users|length),
+    ('Admins', users|selectattr('role', 'equalto', 'admin')|list|length),
+    ('Premium accounts', users|selectattr('plan', 'equalto', 'premium')|list|length),
+    ('Login events', login_events|length)
+  ] %}
   <div class="card"><div class="text-xs" style="color: var(--fg-muted)">{{ l }}</div><div class="font-display text-2xl font-semibold mt-1">{{ v }}</div></div>
   {% endfor %}
 </div>
 
 <div class="grid lg:grid-cols-2 gap-4">
   <div class="card">
-    <div class="font-display font-semibold mb-3">System status</div>
-    {% for s,st in [('API gateway','operational'),('AutoML cluster','operational'),('Vector store','operational'),('Report renderer','degraded')] %}
-    <div class="flex justify-between py-2 border-b text-sm" style="border-color: var(--border)">
-      <span>{{ s }}</span>
-      <span class="badge {% if st=='operational' %}badge-success{% else %}badge-warn{% endif %}">{{ st }}</span>
-    </div>{% endfor %}
+    <div class="font-display font-semibold mb-3">Users</div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead><tr style="color: var(--fg-muted); border-bottom: 1px solid var(--border)"><th class="text-left py-2">Name</th><th class="text-left">Email</th><th class="text-left">Role</th><th class="text-left">Plan</th></tr></thead>
+        <tbody>
+          {% for user in users %}
+          <tr class="border-b" style="border-color: var(--border)">
+            <td class="py-3">{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td><span class="badge {% if user.role == 'admin' %}badge-accent{% endif %}">{{ user.role }}</span></td>
+            <td><span class="badge {% if user.plan == 'premium' %}badge-success{% endif %}">{{ user.plan }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
+
   <div class="card">
-    <div class="font-display font-semibold mb-3">Recent audit events</div>
-    {% for u, a, t in [('jane@acme.com','rotated API key','2m ago'),('marcus@acme.com','invited 2 members','1h ago'),('admin@nova.io','enabled SSO','yesterday')] %}
-    <div class="py-2 border-b text-sm" style="border-color: var(--border)">
-      <div>{{ u }} — {{ a }}</div>
-      <div class="text-xs" style="color: var(--fg-subtle)">{{ t }}</div>
-    </div>{% endfor %}
+    <div class="font-display font-semibold mb-3">Login events</div>
+    {% if login_events %}
+      {% for event in login_events %}
+      <div class="py-2 border-b text-sm" style="border-color: var(--border)">
+        <div class="flex justify-between gap-3">
+          <span>{{ event.email }}</span>
+          <span class="badge {% if event.success %}badge-success{% else %}badge-warn{% endif %}">{{ 'success' if event.success else 'failed' }}</span>
+        </div>
+        <div class="text-xs" style="color: var(--fg-subtle)">{{ event.created_at }}{% if event.ip_address %} · {{ event.ip_address }}{% endif %}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-sm" style="color: var(--fg-muted)">No login events yet.</p>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

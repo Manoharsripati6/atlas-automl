@@ -24,6 +24,7 @@ outputs/
 *.csv
 *.xlsx
 *.json
+atlas.db
 
 # =========================
 # IDE / Editor

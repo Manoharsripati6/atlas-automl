@@ -25,9 +25,9 @@
     {% set steps = [
       ('Dataset ingest', latest_run.rows ~ ' rows, ' ~ latest_run.columns ~ ' columns'),
       ('Privacy preprocessing', (result.actions|length) ~ ' actions recorded'),
-      ('EDA engine', result.eda_report.numeric_columns|length ~ ' numeric and ' ~ result.eda_report.categorical_columns|length ~ ' categorical columns'),
-      ('Insight engine', (result.insights|length) ~ ' insights generated'),
-      ('AutoML engine', result.ml_summary.task_type ~ ' task, target ' ~ result.ml_summary.target_column),
+      ('EDA engine', (result.display_eda_report or result.eda_report).numeric_columns|length ~ ' numeric and ' ~ (result.display_eda_report or result.eda_report).categorical_columns|length ~ ' categorical columns'),
+      ('Insight engine', ((result.display_insights or result.insights)|length) ~ ' insights generated'),
+      ('AutoML engine', (result.display_ml_summary or result.ml_summary).task_type ~ ' task, target ' ~ (result.display_ml_summary or result.ml_summary).target_column),
       ('Visualization engines', (result.plots|length + result.ml_plots|length) ~ ' plots generated'),
       ('Report generator', 'Final report saved to outputs/final_report.txt')
     ] %}

@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block body %}
 <div class="flex">
-  <!-- Sidebar -->
   <aside class="sidebar">
     <a href="{{ url_for('dashboard') }}" class="flex items-center gap-2 px-3 py-2 mb-4">
       <div class="w-7 h-7 rounded-lg" style="background: var(--grad-accent); box-shadow: var(--shadow-glow);"></div>
@@ -9,7 +8,7 @@
     </a>
     <button class="flex items-center gap-2 px-3 py-2 mb-3 rounded-lg text-sm" style="background: var(--surface); border: 1px solid var(--border); color: var(--fg-muted);">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      Search<span class="ml-auto kbd">⌘K</span>
+      Search<span class="ml-auto kbd">Ctrl K</span>
     </button>
 
     {% set nav = [
@@ -33,7 +32,6 @@
       ('api',      'API Keys', url_for('api_keys')),
       ('billing',  'Billing',  url_for('billing')),
       ('settings', 'Settings', url_for('settings')),
-      ('admin',    'Admin',    url_for('admin')),
     ] %}
     {% for key, label, href in nav2 %}
     <a href="{{ href }}" class="nav-item {% if active == key %}active{% endif %}">
@@ -42,17 +40,23 @@
     </a>
     {% endfor %}
 
+    {% if is_admin %}
+    <a href="{{ url_for('admin') }}" class="nav-item {% if active == 'admin' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-5"/></svg>
+      Admin
+    </a>
+    {% endif %}
+
     <div class="mt-auto card" style="padding: 14px;">
-      <div class="text-xs mb-1" style="color: var(--fg-subtle)">Workspace usage</div>
-      <div class="text-sm font-medium mb-2">68% of 100 GB</div>
+      <div class="text-xs mb-1" style="color: var(--fg-subtle)">Current plan</div>
+      <div class="text-sm font-medium mb-2">{{ (current_user.plan if current_user else 'free')|title }}</div>
       <div class="h-1.5 rounded-full overflow-hidden" style="background: var(--border);">
-        <div class="h-full" style="width:68%; background: var(--grad-accent);"></div>
+        <div class="h-full" style="width:{% if current_user and current_user.plan == 'premium' %}100{% else %}35{% endif %}%; background: var(--grad-accent);"></div>
       </div>
-      <a href="{{ url_for('billing') }}" class="block mt-3 text-xs" style="color: var(--accent)">Upgrade →</a>
+      <a href="{{ url_for('billing') }}" class="block mt-3 text-xs" style="color: var(--accent)">Billing</a>
     </div>
   </aside>
 
-  <!-- Main -->
   <div class="flex-1 min-w-0">
     <div class="topbar">
       <div class="flex items-center gap-3">
@@ -63,13 +67,20 @@
         <button class="btn btn-ghost btn-sm" data-theme-toggle title="Toggle theme">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         </button>
-        <button class="btn btn-ghost btn-sm" title="Notifications">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-        </button>
-        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold" style="background: var(--grad-accent); color: white;">JS</div>
+        <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Logout</a>
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold" style="background: var(--grad-accent); color: white;">{{ (current_user.name[:1] if current_user else 'U')|upper }}</div>
       </div>
     </div>
     <div class="p-8 max-w-7xl mx-auto">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-4 space-y-2">
+          {% for category, message in messages %}
+          <div class="text-sm rounded-lg px-3 py-2" style="border: 1px solid var(--border); color: {% if category == 'error' %}#fca5a5{% else %}var(--fg-muted){% endif %};">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% endwith %}
       {% block content %}{% endblock %}
     </div>
   </div>

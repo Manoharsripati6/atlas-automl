@@ -9,8 +9,8 @@
 </div>
 
 {% if result %}
-{% set eda = result.eda_report %}
-{% set ml = result.ml_summary %}
+{% set eda = result.display_eda_report or result.eda_report %}
+{% set ml = result.display_ml_summary or result.ml_summary %}
 <div class="grid md:grid-cols-4 gap-4 mb-8">
   {% for label, value, sub, accent in [
     ('Dataset', latest_run.filename, latest_run.rows ~ ' rows', False),
@@ -35,7 +35,7 @@
     <div class="space-y-3">
       {% for label, status, href in [
         ('EDA report', eda.rows ~ ' rows analyzed', url_for('eda')),
-        ('Insights', result.insights|length ~ ' findings', url_for('insights')),
+        ('Insights', (result.display_insights or result.insights)|length ~ ' findings', url_for('insights')),
         ('Visualizations', (result.plots|length + result.ml_plots|length) ~ ' images', url_for('visualizations')),
         ('Machine learning', ml.best_model.model if ml.best_model else 'No winning model', url_for('ml_results')),
         ('Final report', 'Ready', url_for('report'))

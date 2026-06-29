@@ -17,11 +17,15 @@ llm = ChatGroq(
 def generate_report(
     insights,
     ml_results,
-    viz_plan=None
+    viz_plan=None,
+    encoded_data_context=None
 ):
 
     if viz_plan is None:
         viz_plan = []
+
+    if encoded_data_context is None:
+        encoded_data_context = {}
 
     prompt = ChatPromptTemplate.from_template(
         """
@@ -34,8 +38,13 @@ IMPORTANT:
 - Do NOT invent statistics.
 - Do NOT invent columns.
 - Do NOT invent findings.
+- Column names are anonymized. Use the anonymized names exactly as provided.
+- The encoded normalized data may reveal patterns, but it does not contain the original column names.
 - Explain findings in business language.
 - Write professionally.
+
+Encoded + Normalized Dataset Context:
+{encoded_data_context}
 
 Dataset Insights:
 {insights}
@@ -105,6 +114,10 @@ Return plain text only.
             ),
             "viz_plan": json.dumps(
                 viz_plan,
+                indent=2
+            ),
+            "encoded_data_context": json.dumps(
+                encoded_data_context,
                 indent=2
             )
         }

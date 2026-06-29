@@ -21,7 +21,7 @@
     ('Numeric columns', eda.numeric_columns|length, ''),
     ('Categorical columns', eda.categorical_columns|length, ''),
     ('Correlation columns', corr_count, 'numeric matrix'),
-    ('Target column', latest_run.result.ml_summary.target_column, 'last column')
+    ('Target column', (latest_run.result.display_ml_summary or latest_run.result.ml_summary).target_column, 'last column')
   ] %}
   <div class="card card-hover fade-up">
     <div class="text-xs" style="color: var(--fg-muted)">{{ label }}</div>

@@ -13,6 +13,57 @@ from tools.llm_report_writer import generate_report
 from tools.de_anonymizer import deanonymize_text
 
 
+def _safe_llm_data_context(anonymized_df):
+
+    sample = (
+        anonymized_df
+        .head(25)
+        .round(6)
+        .to_dict(orient="records")
+    )
+
+    return {
+        "shape": {
+            "rows": int(anonymized_df.shape[0]),
+            "columns": int(anonymized_df.shape[1])
+        },
+        "columns": anonymized_df.columns.tolist(),
+        "dtypes": {
+            col: str(dtype)
+            for col, dtype in anonymized_df.dtypes.items()
+        },
+        "sample_records": sample
+    }
+
+
+def _deanonymize_structure(value, metadata):
+
+    column_map = metadata["column_map"]
+
+    if isinstance(value, dict):
+
+        return {
+            column_map.get(key, key): _deanonymize_structure(val, metadata)
+            for key, val in value.items()
+        }
+
+    if isinstance(value, list):
+
+        return [
+            _deanonymize_structure(item, metadata)
+            for item in value
+        ]
+
+    if isinstance(value, str):
+
+        return deanonymize_text(
+            value,
+            metadata
+        )
+
+    return value
+
+
 def run_pipeline(file_path):
 
     print("=" * 60)
@@ -172,10 +223,15 @@ def run_pipeline(file_path):
     print("GENERATING REPORT")
     print("=" * 60)
 
+    encoded_data_context = _safe_llm_data_context(
+        anonymized_df
+    )
+
     report = generate_report(
         insights=insights,
         ml_results=ml_summary,
-        viz_plan=viz_plan
+        viz_plan=viz_plan,
+        encoded_data_context=encoded_data_context
     )
 
     print("Completed")
@@ -190,6 +246,26 @@ def run_pipeline(file_path):
 
     final_report = deanonymize_text(
         report,
+        metadata
+    )
+
+    display_eda_report = _deanonymize_structure(
+        eda_report,
+        metadata
+    )
+
+    display_insights = _deanonymize_structure(
+        insights,
+        metadata
+    )
+
+    display_ml_summary = _deanonymize_structure(
+        ml_summary,
+        metadata
+    )
+
+    display_visualization_plan = _deanonymize_structure(
+        viz_plan,
         metadata
     )
 
@@ -281,6 +357,11 @@ def run_pipeline(file_path):
         "ml_summary": ml_summary,
 
         "visualization_plan": viz_plan,
+        "display_eda_report": display_eda_report,
+        "display_insights": display_insights,
+        "display_ml_summary": display_ml_summary,
+        "display_visualization_plan": display_visualization_plan,
+        "encoded_data_context": encoded_data_context,
 
         "plots": plots,
         "ml_plots": ml_plots,

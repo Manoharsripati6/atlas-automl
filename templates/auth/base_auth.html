@@ -15,6 +15,17 @@
   <main class="relative z-10 flex items-center justify-center px-6 py-10">
     <div class="w-full max-w-md fade-up">
       <div class="glass-strong rounded-2xl p-8" style="box-shadow: var(--shadow-lg);">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-4 space-y-2">
+            {% for category, message in messages %}
+            <div class="text-sm rounded-lg px-3 py-2" style="border: 1px solid var(--border); color: {% if category == 'error' %}#fca5a5{% else %}var(--fg-muted){% endif %};">
+              {{ message }}
+            </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% endwith %}
         {% block auth %}{% endblock %}
       </div>
       <p class="text-center text-xs mt-6" style="color: var(--fg-subtle)">{% block auth_footer %}{% endblock %}</p>
